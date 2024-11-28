@@ -1,17 +1,130 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Data.SqlClient;
-using Dapper;
-using System.Data.Entity;
+using System;
+using System.Configuration;
 
 namespace DatabaseCars
 {
-    internal class Program
+    public class Owner
     {
-        readonly string connectionString = "Server=localhost;Database=CarRegistry;Trusted_Connection=True;";
+        public int Id { get; set; }
+        public string OwnerName { get; set; }
+        public string OwnerAddress { get; set; }
+        public ICollection<Car> Cars { get; set; } = new List<Car>();
+    }
+    public class Car
+    {
+        public int Id { get; set; }
+        public string CarModel { get; set; }
+        public int RegistrationYear { get; set; }
+        public int OwnerId { get; set; }
+        public Owner Owner { get; set; }
+    }
+
+    class Program
+    {
+        private static readonly string connectionString = ConfigurationManager.ConnectionStrings["master"].ConnectionString;
+
+        private static readonly string masterConnectionString = "Data Source=KLAIMMOR\\SQLEXPRESS;Initial Catalog=master;Integrated Security=True";
         static void Main(string[] args)
         {
-            
+            //CreateDatabaseAndTables();
+            //Insert();
+            var carService = new CarService(connectionString);
+            var ownerService = new OwnerService(connectionString);
+
+            //Работа с автомобилями
+            carService.AddCar("Ford Bronco", 1980, 3);
+            var cars = carService.GetAllCars();
+            foreach (var car in cars)
+            {
+                Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}, OwnerId: {car.OwnerId}");
+            }
+
+            //Работа с владельцами
+            var owners = ownerService.GetAllOwners();
+            foreach (var owner in owners)
+            {
+                Console.WriteLine($"Owner: {owner.OwnerName}, Address: {owner.OwnerAddress}");
+            }
+
+            //Вывод через EF
+            var carOwnerService = new CarOwnerService();
+            carOwnerService.DisplayCarsWithOwners();
+        }
+        static void CreateDatabaseAndTables()
+        {
+            string createDatabase = @"
+            IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'CarOwnerManager')
+            BEGIN
+                CREATE DATABASE CarOwnerManager;
+            END";
+
+            string createTables = @"
+            USE CarOwnerManager;
+
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Owners' AND xtype='U')
+            BEGIN
+                CREATE TABLE Owners (
+                    Id INT PRIMARY KEY IDENTITY,
+                    OwnerName NVARCHAR(100) NOT NULL,
+                    OwnerAddress NVARCHAR(255) NOT NULL
+                );
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Cars' AND xtype='U')
+            BEGIN
+                CREATE TABLE Cars (
+                    Id INT PRIMARY KEY IDENTITY,
+                    CarModel NVARCHAR(100) NOT NULL,
+                    RegistrationYear INT NOT NULL,
+                    OwnerId INT FOREIGN KEY REFERENCES Owners(Id)
+                );
+            END;";
+
+            using (var connection = new SqlConnection(masterConnectionString))
+            {
+                connection.Open();
+
+                //Создание базы данных
+                using (var command = new SqlCommand(createDatabase, connection))
+                {
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("База данных создана.");
+                }
+
+                //Создание таблиц
+                using (var command = new SqlCommand(createTables, connection))
+                {
+                    command.ExecuteNonQuery();
+                    Console.WriteLine("Таблицы созданы.");
+                }
+            }
+        }
+        static void Insert()
+        {
+            string query1 = @"INSERT INTO Owners (OwnerName, OwnerAddress) VALUES 
+                            ('John Doe', '123 Elm Street'),
+                            ('Jane Smith', '456 Oak Avenue'),
+                            ('Amina Arslanova', '569 Tik Preview');";
+
+
+            string query2 = @"INSERT INTO Cars (CarModel, RegistrationYear, OwnerId) VALUES 
+                            ('Toyota Corolla', 2020, 1),
+                            ('Honda Civic', 2018, 2),
+                            ('Ford Econoline', 1997, 3);";
+            using(var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new SqlCommand(query1, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+                using (var command = new SqlCommand(query2, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }
