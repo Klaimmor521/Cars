@@ -23,6 +23,18 @@ namespace DatabaseCars
             }
         }
 
+        public void AddOwner(string OwnerName, string OwnerAddress)
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                var command = new SqlCommand("INSERT INTO Owners (OwnerName, OwnerAddress) VALUES (@OwnerName, @OwnerAddress)", connection);
+                command.Parameters.AddWithValue("@OwnerName", OwnerName);
+                command.Parameters.AddWithValue("@OwnerAddress", OwnerAddress);
+                command.ExecuteNonQuery();
+            }
+        }
+
         public void UpdateOwner(int id, string newName, string newAddress)
         {
             using (var connection = new SqlConnection(connectionString))
