@@ -28,10 +28,8 @@ namespace DatabaseCars
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("INSERT INTO Owners (OwnerName, OwnerAddress) VALUES (@OwnerName, @OwnerAddress)", connection);
-                command.Parameters.AddWithValue("@OwnerName", OwnerName);
-                command.Parameters.AddWithValue("@OwnerAddress", OwnerAddress);
-                command.ExecuteNonQuery();
+                var query = "INSERT INTO Owners (OwnerName, OwnerAddress) VALUES (@OwnerName, @OwnerAddress)";
+                connection.Execute(query, new { OwnerName, OwnerAddress });
             }
         }
 
