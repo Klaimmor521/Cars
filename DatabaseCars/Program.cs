@@ -24,7 +24,6 @@ namespace DatabaseCars
     class Program
     {
         private static readonly string connectionString = ConfigurationManager.ConnectionStrings["master"].ConnectionString;
-
         private static readonly string masterConnectionString = "Data Source=KLAIMMOR\\SQLEXPRESS;Initial Catalog=master;Integrated Security=True";
         static void Main(string[] args)
         {
@@ -34,21 +33,36 @@ namespace DatabaseCars
             var ownerService = new OwnerService(connectionString);
 
             //Работа с автомобилями
-            carService.AddCar("Ford Bronco", 1980, 3);
-            var cars = carService.GetAllCars();
-            foreach (var car in cars)
-            {
-                Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}, OwnerId: {car.OwnerId}");
-            }
+            //Добавление авто
+            //carService.AddCar("Volvo XC90 II", 2019, 4);
+
+            //Вывод авто
+            //var cars = carService.GetAllCars();
+            //foreach (var car in cars)
+            //    Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}, OwnerId: {car.OwnerId}");
+
+            //Обновить авто
+            //carService.UpdateCar(2, "Honda Odyssey", 2019);
+
+            //Удалить авто
+            //carService.DeleteCar(1);
 
             //Работа с владельцами
-            var owners = ownerService.GetAllOwners();
-            foreach (var owner in owners)
-            {
-                Console.WriteLine($"Owner: {owner.OwnerName}, Address: {owner.OwnerAddress}");
-            }
+            //Вывод с владельцами
+            //var owners = ownerService.GetAllOwners();
+            //foreach (var owner in owners)
+            //    Console.WriteLine($"Owner: {owner.OwnerName}, Address: {owner.OwnerAddress}");
 
-            //Вывод через EF
+            //Добавление владельца
+            //ownerService.AddOwner("Muhtar", "458 Awenie pre");
+
+            //Обновление владельца
+            //ownerService.UpdateOwner(2, "Jenny Canoli", "456 Oak Avenie");
+
+            //Удаление владельца
+            //ownerService.DeleteOwner(1);
+
+            //Вывод через EF авто с владельцами
             var carOwnerService = new CarOwnerService();
             carOwnerService.DisplayCarsWithOwners();
         }
