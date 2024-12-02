@@ -34,15 +34,15 @@ namespace DatabaseCars
 
             //Работа с автомобилями
             //Добавление авто
-            //carService.AddCar("Volvo XC90 II", 2019, 4);
+            //carService.AddCar("Volvo XC90 I", 2019, 4);
 
             //Вывод авто
             //var cars = carService.GetAllCars();
             //foreach (var car in cars)
-            //    Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}, OwnerId: {car.OwnerId}");
+            //    Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}");
 
             //Обновить авто
-            //carService.UpdateCar(2, "Honda Odyssey", 2019);
+            //carService.UpdateCar(2, "Honda Odyssey", 2020);
 
             //Удалить авто
             //carService.DeleteCar(1);
@@ -54,7 +54,7 @@ namespace DatabaseCars
             //    Console.WriteLine($"Owner: {owner.OwnerName}, Address: {owner.OwnerAddress}");
 
             //Добавление владельца
-            //ownerService.AddOwner("Muhtar", "458 Awenie pre");
+            //ownerService.AddOwner("Danil", "210 Artic Pro");
 
             //Обновление владельца
             //ownerService.UpdateOwner(2, "Jenny Canoli", "456 Oak Avenie");

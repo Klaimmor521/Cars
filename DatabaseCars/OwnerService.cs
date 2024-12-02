@@ -3,6 +3,7 @@ using System.Linq;
 using System.Data.SqlClient;
 using Dapper;
 using System.Configuration;
+//ADO.NET
 
 namespace DatabaseCars
 {
@@ -14,13 +15,30 @@ namespace DatabaseCars
             this.connectionString = ConfigurationManager.ConnectionStrings["master"].ConnectionString;
         }
 
-        public IEnumerable<Owner> GetAllOwners()
+        public List<Owner> GetAllOwners()
         {
+            var owners = new List<Owner>();
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                return connection.Query<Owner>("SELECT * FROM Owners").ToList();
+                var query = "SELECT * FROM Owners";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            owners.Add(new Owner
+                            {
+                                Id = (int)reader["Id"],
+                                OwnerName = reader["OwnerName"].ToString(),
+                                OwnerAddress = reader["OwnerAddress"].ToString()
+                            });
+                        }
+                    }
+                }
             }
+            return owners;
         }
 
         public void AddOwner(string OwnerName, string OwnerAddress)
@@ -29,26 +47,42 @@ namespace DatabaseCars
             {
                 connection.Open();
                 var query = "INSERT INTO Owners (OwnerName, OwnerAddress) VALUES (@OwnerName, @OwnerAddress)";
-                connection.Execute(query, new { OwnerName, OwnerAddress });
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@OwnerName", OwnerName);
+                    command.Parameters.AddWithValue("@OwnerAddress", OwnerAddress);
+                    command.ExecuteNonQuery();
+                }
             }
         }
 
-        public void UpdateOwner(int id, string newName, string newAddress)
+        public void UpdateOwner(int Id, string NewName, string NewAddress)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                connection.Execute("UPDATE Owners SET OwnerName = @Name, OwnerAddress = @Address WHERE Id = @Id",
-                    new { Name = newName, Address = newAddress, Id = id });
+                var query = "UPDATE Owners SET OwnerName = @OwnerName, OwnerAddress = @OwnerAddress WHERE Id = @Id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@OwnerName", NewName);
+                    command.Parameters.AddWithValue("@OwnerAddress", NewAddress);
+                    command.Parameters.AddWithValue("@Id", Id);
+                    command.ExecuteNonQuery();
+                }
             }
         }
 
-        public void DeleteOwner(int id)
+        public void DeleteOwner(int Id)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                connection.Execute("DELETE FROM Owners WHERE Id = @Id", new { Id = id });
+                var query = "DELETE FROM Owners WHERE Id = @Id";
+                using (var command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", Id);
+                    command.ExecuteNonQuery();
+                }
             }
         }
     }

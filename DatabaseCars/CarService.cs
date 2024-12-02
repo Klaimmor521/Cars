@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Configuration;
+using Dapper;
+using System.Linq;
+//Dapper
 
 namespace DatabaseCars
 {
@@ -14,64 +17,41 @@ namespace DatabaseCars
 
         public List<Car> GetAllCars()
         {
-            var cars = new List<Car>();
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                using (var command = new SqlCommand("SELECT * FROM Cars", connection))
-                {
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            cars.Add(new Car
-                            {
-                                Id = (int)reader["Id"],
-                                CarModel = reader["CarModel"].ToString(),
-                                RegistrationYear = (int)reader["RegistrationYear"],
-                                OwnerId = (int)reader["OwnerId"]
-                            });
-                        }
-                    }
-                }
+                var query = "SELECT * FROM Cars";
+                return connection.Query<Car>(query).ToList();
             }
-            return cars;
         }
 
-        public void AddCar(string model, int year, int ownerId)
+        public void AddCar(string CarModel, int RegistrationYear, int OwnerId)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("INSERT INTO Cars (CarModel, RegistrationYear, OwnerId) VALUES (@Model, @Year, @OwnerId)", connection);
-                command.Parameters.AddWithValue("@Model", model);
-                command.Parameters.AddWithValue("@Year", year);
-                command.Parameters.AddWithValue("@OwnerId", ownerId);
-                command.ExecuteNonQuery();
+                var query = "INSERT INTO Cars (CarModel, RegistrationYear, OwnerId) VALUES (@CarModel, @RegistrationYear, @OwnerId)";
+                connection.Execute(query, new { CarModel, RegistrationYear, OwnerId });
             }
         }
 
-        public void UpdateCar(int id, string model, int year)
+        public void UpdateCar(int Id, string NewCarModel, int NewRegistrationYear)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("UPDATE Cars SET CarModel = @Model, RegistrationYear = @Year WHERE Id = @Id", connection);
-                command.Parameters.AddWithValue("@Model", model);
-                command.Parameters.AddWithValue("@Year", year);
-                command.Parameters.AddWithValue("@Id", id);
-                command.ExecuteNonQuery();
+                var query = "UPDATE Cars SET CarModel = @CarModel, RegistrationYear = @RegistrationYear WHERE Id = @Id";
+                connection.Execute(query, new { CarModel = NewCarModel, RegistrationYear = NewRegistrationYear, Id });
             }
         }
 
-        public void DeleteCar(int id)
+        public void DeleteCar(int Id)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                var command = new SqlCommand("DELETE FROM Cars WHERE Id = @Id", connection);
-                command.Parameters.AddWithValue("@Id", id);
-                command.ExecuteNonQuery();
+                var query = "DELETE FROM Cars WHERE Id = @Id";
+                connection.Execute(query, new { Id });
             }
         }
     }

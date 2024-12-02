@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+//Entity Framework
 
 namespace DatabaseCars
 {
@@ -9,9 +10,9 @@ namespace DatabaseCars
         {
             using (var context = new CarRegistryContext())
             {
-                var cars = context.Cars.Include("Owner").ToList();
+                var carsWithOwners = context.Cars.Include("Owner").ToList();
 
-                foreach (var car in cars)
+                foreach (var car in carsWithOwners)
                 {
                     Console.WriteLine($"Car: {car.CarModel}, Year: {car.RegistrationYear}, Owner: {car.Owner.OwnerName}");
                 }
